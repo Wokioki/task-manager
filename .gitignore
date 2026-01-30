@@ -1,0 +1,11 @@
+# === Backend (Spring Boot) ===
+/server/target/
+*.log
+
+# === Frontend (React / Vite) ===
+/client/node_modules/
+/client/dist/
+
+# === IDE / OS ===
+.idea/
+.DS_Store
