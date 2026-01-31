@@ -7,5 +7,11 @@
 /client/dist/
 
 # === IDE / OS ===
-.idea/
+**/.idea/
+**/*.iml
 .DS_Store
+
+# env files
+.env
+server/.env
+client/.env.local
