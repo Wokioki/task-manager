@@ -1,5 +1,8 @@
 package com.wokioki.server.service;
 
+import com.wokioki.server.dto.TaskCreateRequest;
+import com.wokioki.server.dto.TaskResponse;
+import com.wokioki.server.dto.TaskUpdateRequest;
 import com.wokioki.server.model.Task;
 import com.wokioki.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,21 +17,27 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    public List<Task> findAll() {
-        return taskRepository.findAll();
+    public List<TaskResponse> findAll() {
+        return taskRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Task create(Task task) {
-        task.setId(null);
-        return taskRepository.save(task);
+    public TaskResponse create(TaskCreateRequest req) {
+        Task task = new Task();
+        task.setTitle(req.title());
+        task.setDescription(req.description());
+        task.setDone(false);
+
+        return toResponse(taskRepository.save(task));
     }
 
-    public Optional<Task> update(Long id, Task details) {
+    public Optional<TaskResponse> update(Long id, TaskUpdateRequest req) {
         return taskRepository.findById(id).map(existing -> {
-            existing.setTitle(details.getTitle());
-            existing.setDescription(details.getDescription());
-            existing.setDone(details.isDone());
-            return taskRepository.save(existing);
+            existing.setTitle(req.title());
+            existing.setDescription(req.description());
+            existing.setDone(req.done());
+            return toResponse(taskRepository.save(existing));
         });
     }
 
@@ -38,5 +47,14 @@ public class TaskService {
             return true;
         }
         return false;
+    }
+
+    private TaskResponse toResponse(Task task){
+        return new TaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.isDone()
+        );
     }
 }

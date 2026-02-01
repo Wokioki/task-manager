@@ -1,6 +1,9 @@
 package com.wokioki.server.controller;
 
 
+import com.wokioki.server.dto.TaskCreateRequest;
+import com.wokioki.server.dto.TaskResponse;
+import com.wokioki.server.dto.TaskUpdateRequest;
 import com.wokioki.server.model.Task;
 import com.wokioki.server.service.TaskService;
 import jakarta.validation.Valid;
@@ -18,18 +21,18 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<Task> getAll() {
+    public List<TaskResponse> getAll() {
         return taskService.findAll();
     }
 
     @PostMapping
-    public Task create(@Valid @RequestBody Task task) {
-        return taskService.create(task);
+    public TaskResponse create(@Valid @RequestBody TaskCreateRequest req) {
+        return taskService.create(req);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody Task task) {
-        return taskService.update(id, task)
+    public ResponseEntity<TaskResponse> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateRequest req) {
+        return taskService.update(id, req)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
