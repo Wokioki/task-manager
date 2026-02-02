@@ -3,6 +3,7 @@ package com.wokioki.server.service;
 import com.wokioki.server.dto.TaskCreateRequest;
 import com.wokioki.server.dto.TaskResponse;
 import com.wokioki.server.dto.TaskUpdateRequest;
+import com.wokioki.server.mapper.TaskMapper;
 import com.wokioki.server.model.Task;
 import com.wokioki.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,9 @@ public class TaskService {
     private final TaskRepository taskRepository;
 
     public List<TaskResponse> findAll() {
-        return taskRepository.findAll().stream()
-                .map(this::toResponse)
+        return taskRepository.findAll()
+                .stream()
+                .map(TaskMapper::toResponse)
                 .toList();
     }
 
@@ -29,32 +31,24 @@ public class TaskService {
         task.setDescription(req.description());
         task.setDone(false);
 
-        return toResponse(taskRepository.save(task));
+        return TaskMapper.toResponse(taskRepository.save(task));
     }
 
     public Optional<TaskResponse> update(Long id, TaskUpdateRequest req) {
-        return taskRepository.findById(id).map(existing -> {
-            existing.setTitle(req.title());
-            existing.setDescription(req.description());
-            existing.setDone(req.done());
-            return toResponse(taskRepository.save(existing));
+        return taskRepository.findById(id)
+                .map(existing -> {
+                    existing.setTitle(req.title());
+                    existing.setDescription(req.description());
+                    existing.setDone(req.done());
+                    return TaskMapper.toResponse(taskRepository.save(existing));
         });
     }
 
     public boolean delete(Long id) {
-        if (taskRepository.existsById(id)) {
-            taskRepository.deleteById(id);
-            return true;
+        if (!taskRepository.existsById(id)) {
+            return false;
         }
-        return false;
-    }
-
-    private TaskResponse toResponse(Task task){
-        return new TaskResponse(
-                task.getId(),
-                task.getTitle(),
-                task.getDescription(),
-                task.isDone()
-        );
+        taskRepository.deleteById(id);
+        return true;
     }
 }

@@ -4,7 +4,6 @@ package com.wokioki.server.controller;
 import com.wokioki.server.dto.TaskCreateRequest;
 import com.wokioki.server.dto.TaskResponse;
 import com.wokioki.server.dto.TaskUpdateRequest;
-import com.wokioki.server.model.Task;
 import com.wokioki.server.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
