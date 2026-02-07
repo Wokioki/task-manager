@@ -42,4 +42,9 @@ public class TaskController {
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/{id}")
+    public TaskResponse getOne(@PathVariable Long id){
+        return taskService.findById(id);
+    }
 }

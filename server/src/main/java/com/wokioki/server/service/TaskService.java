@@ -3,6 +3,7 @@ package com.wokioki.server.service;
 import com.wokioki.server.dto.TaskCreateRequest;
 import com.wokioki.server.dto.TaskResponse;
 import com.wokioki.server.dto.TaskUpdateRequest;
+import com.wokioki.server.exception.TaskNotFoundException;
 import com.wokioki.server.mapper.TaskMapper;
 import com.wokioki.server.model.Task;
 import com.wokioki.server.repository.TaskRepository;
@@ -23,6 +24,13 @@ public class TaskService {
                 .stream()
                 .map(TaskMapper::toResponse)
                 .toList();
+    }
+
+    public TaskResponse findById(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        return TaskMapper.toResponse(task);
     }
 
     public TaskResponse create(TaskCreateRequest req) {
