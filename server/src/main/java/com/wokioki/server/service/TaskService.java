@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,21 +41,23 @@ public class TaskService {
         return TaskMapper.toResponse(taskRepository.save(task));
     }
 
-    public Optional<TaskResponse> update(Long id, TaskUpdateRequest req) {
-        return taskRepository.findById(id)
-                .map(existing -> {
-                    existing.setTitle(req.title());
-                    existing.setDescription(req.description());
-                    existing.setDone(req.done());
-                    return TaskMapper.toResponse(taskRepository.save(existing));
-        });
+    public TaskResponse update(Long id, TaskUpdateRequest req) {
+        Task existing = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        existing.setTitle(req.title());
+        existing.setDescription(req.description());
+        existing.setDone(req.done());
+
+        Task saved = taskRepository.save(existing);
+        return TaskMapper.toResponse(saved);
     }
 
-    public boolean delete(Long id) {
+
+    public void delete(Long id) {
         if (!taskRepository.existsById(id)) {
-            return false;
+            throw new TaskNotFoundException(id);
         }
         taskRepository.deleteById(id);
-        return true;
     }
 }
