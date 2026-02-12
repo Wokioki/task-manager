@@ -22,8 +22,12 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<TaskResponse> getAll() {
-        return taskService.findAll();
+    public Page<TaskResponse> getAll(
+            @RequestParam(required = false) Boolean done,
+            @RequestParam(required = false) String q,
+            Pageable pageable
+    ) {
+        return taskService.findAll(done, q, pageable);
     }
 
     @GetMapping("/{id}")
@@ -47,12 +51,5 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public Page<TaskResponse> getAll(
-            @RequestParam(required = false) Boolean done,
-            @RequestParam(required = false) String q,
-            Pageable pageable
-    ) {
-        return taskService.findAll(done, q, pageable);
-    }
+
 }
