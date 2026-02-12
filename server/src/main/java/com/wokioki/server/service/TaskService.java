@@ -8,6 +8,8 @@ import com.wokioki.server.mapper.TaskMapper;
 import com.wokioki.server.model.Task;
 import com.wokioki.server.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -59,5 +61,20 @@ public class TaskService {
             throw new TaskNotFoundException(id);
         }
         taskRepository.deleteById(id);
+    }
+
+    public Page<TaskResponse> findAll(Boolean done, String q, Pageable pageable) {
+
+        Page<Task> page;
+
+        if(q != null && !q.isBlank()) {
+            page= taskRepository.findByTitleContainingIgnoreCase(q.trim(), pageable);
+        }else if (done != null) {
+            page = taskRepository.findByDone(done, pageable);
+        }else{
+            page = taskRepository.findAll(pageable);
+        }
+
+        return page.map(TaskMapper::toResponse);
     }
 }

@@ -7,6 +7,8 @@ import com.wokioki.server.dto.TaskUpdateRequest;
 import com.wokioki.server.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,5 +45,14 @@ public class TaskController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         taskService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public Page<TaskResponse> getAll(
+            @RequestParam(required = false) Boolean done,
+            @RequestParam(required = false) String q,
+            Pageable pageable
+    ) {
+        return taskService.findAll(done, q, pageable);
     }
 }
