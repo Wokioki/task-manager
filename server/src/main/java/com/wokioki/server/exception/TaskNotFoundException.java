@@ -1,7 +1,7 @@
 package com.wokioki.server.exception;
 
 public class TaskNotFoundException extends RuntimeException{
-    private final long id;
+    private final Long id;
 
 
     public TaskNotFoundException(Long id){
