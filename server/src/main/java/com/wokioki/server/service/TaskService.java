@@ -20,11 +20,19 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    public List<TaskResponse> findAll() {
-        return taskRepository.findAll()
-                .stream()
-                .map(TaskMapper::toResponse)
-                .toList();
+    public Page<TaskResponse> findAll(Boolean done, String q, Pageable pageable) {
+
+        Page<Task> page;
+
+        if(q != null && !q.isBlank()) {
+            page= taskRepository.findByTitleContainingIgnoreCase(q.trim(), pageable);
+        }else if (done != null) {
+            page = taskRepository.findByDone(done, pageable);
+        }else{
+            page = taskRepository.findAll(pageable);
+        }
+
+        return page.map(TaskMapper::toResponse);
     }
 
     public TaskResponse findById(Long id) {
@@ -63,18 +71,5 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    public Page<TaskResponse> findAll(Boolean done, String q, Pageable pageable) {
 
-        Page<Task> page;
-
-        if(q != null && !q.isBlank()) {
-            page= taskRepository.findByTitleContainingIgnoreCase(q.trim(), pageable);
-        }else if (done != null) {
-            page = taskRepository.findByDone(done, pageable);
-        }else{
-            page = taskRepository.findAll(pageable);
-        }
-
-        return page.map(TaskMapper::toResponse);
-    }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createTask, deleteTask, getTasks, updateTask } from "./api";
+import { createTask, deleteTask, getTasks, updateTask } from "./api/tasksApi";
 import "./App.css";
 
 function App() {
