@@ -1,9 +1,9 @@
 package com.wokioki.server.controller;
 
 
-import com.wokioki.server.dto.TaskCreateRequest;
-import com.wokioki.server.dto.TaskResponse;
-import com.wokioki.server.dto.TaskUpdateRequest;
+import com.wokioki.server.dto.task.TaskCreateRequest;
+import com.wokioki.server.dto.task.TaskResponse;
+import com.wokioki.server.dto.task.TaskUpdateRequest;
 import com.wokioki.server.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")

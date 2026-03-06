@@ -1,4 +1,4 @@
-package com.wokioki.server.dto;
+package com.wokioki.server.dto.task;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.wokioki.server.dto;
+package com.wokioki.server.dto.task;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -1,6 +1,6 @@
 package com.wokioki.server.mapper;
 
-import com.wokioki.server.dto.TaskResponse;
+import com.wokioki.server.dto.task.TaskResponse;
 import com.wokioki.server.model.Task;
 
 public class TaskMapper {
