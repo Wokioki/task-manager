@@ -1,6 +1,5 @@
 package com.wokioki.server.controller;
 
-
 import com.wokioki.server.dto.task.TaskCreateRequest;
 import com.wokioki.server.dto.task.TaskResponse;
 import com.wokioki.server.dto.task.TaskUpdateRequest;
@@ -21,33 +20,36 @@ public class TaskController {
 
     @GetMapping
     public Page<TaskResponse> getAll(
+            @RequestParam Long userId,
             @RequestParam(required = false) Boolean done,
             @RequestParam(required = false) String q,
             Pageable pageable
     ) {
-        return taskService.findAll(done, q, pageable);
+        return taskService.findAll(userId, done, q, pageable);
     }
 
     @GetMapping("/{id}")
-    public TaskResponse getOne(@PathVariable Long id){
-        return taskService.findById(id);
+    public TaskResponse getOne(@RequestParam Long userId, @PathVariable Long id) {
+        return taskService.findById(userId, id);
     }
 
     @PostMapping
-    public TaskResponse create(@Valid @RequestBody TaskCreateRequest req) {
-        return taskService.create(req);
+    public TaskResponse create(@RequestParam Long userId, @Valid @RequestBody TaskCreateRequest req) {
+        return taskService.create(userId, req);
     }
 
     @PutMapping("/{id}")
-    public TaskResponse update(@PathVariable Long id, @Valid @RequestBody TaskUpdateRequest req) {
-        return taskService.update(id, req);
+    public TaskResponse update(
+            @RequestParam Long userId,
+            @PathVariable Long id,
+            @Valid @RequestBody TaskUpdateRequest req
+    ) {
+        return taskService.update(userId, id, req);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        taskService.delete(id);
+    public ResponseEntity<Void> delete(@RequestParam Long userId, @PathVariable Long id) {
+        taskService.delete(userId, id);
         return ResponseEntity.noContent().build();
     }
-
-
 }

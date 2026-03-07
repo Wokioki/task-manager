@@ -17,7 +17,7 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserAuthResponse register(UserRegisterRequest req) {
-        String email = req.email().trim();
+        String email = req.email().trim().toLowerCase();
         String username = req.username().trim();
 
         if (userRepository.existsByEmailIgnoreCase(email)) {
@@ -39,7 +39,9 @@ public class AuthService {
     }
 
     public UserAuthResponse login(UserLoginRequest req) {
-        User user = userRepository.findByEmailIgnoreCase(req.email().trim())
+        String email = req.email().trim().toLowerCase();
+
+        User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
         boolean ok = passwordEncoder.matches(req.password(), user.getPassword());

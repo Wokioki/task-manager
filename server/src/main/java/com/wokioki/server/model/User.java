@@ -1,11 +1,11 @@
 package com.wokioki.server.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -20,21 +20,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Username is required")
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is required")
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "user")
+    private List<Task> tasks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

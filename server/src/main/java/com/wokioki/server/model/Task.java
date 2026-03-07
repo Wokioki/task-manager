@@ -1,14 +1,12 @@
 package com.wokioki.server.model;
 
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.Instant;
 
 @Entity
-@Table(name="tasks")
+@Table(name = "tasks")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +18,6 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
 
@@ -36,6 +33,10 @@ public class Task {
     @Column(nullable = false)
     private Instant updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @PrePersist
     public void onCreate() {
         Instant now = Instant.now();
@@ -47,6 +48,4 @@ public class Task {
     public void onUpdate() {
         this.updatedAt = Instant.now();
     }
-
-
 }
