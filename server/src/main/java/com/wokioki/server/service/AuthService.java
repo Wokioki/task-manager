@@ -15,6 +15,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public UserAuthResponse register(UserRegisterRequest req) {
         String email = req.email().trim().toLowerCase();
@@ -34,8 +35,9 @@ public class AuthService {
                 .build();
 
         User saved = userRepository.save(user);
+        String token = jwtService.generateToken(saved.getEmail());
 
-        return new UserAuthResponse(saved.getId(), saved.getUsername(), saved.getEmail());
+        return new UserAuthResponse(saved.getId(), saved.getUsername(), saved.getEmail(), token);
     }
 
     public UserAuthResponse login(UserLoginRequest req) {
@@ -49,6 +51,8 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        return new UserAuthResponse(user.getId(), user.getUsername(), user.getEmail());
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new UserAuthResponse(user.getId(), user.getUsername(), user.getEmail(), token);
     }
 }
