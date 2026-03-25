@@ -12,6 +12,7 @@ import com.wokioki.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +22,10 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
-    public Page<TaskResponse> findAll(Long userId, Boolean done, String q, Pageable pageable) {
+    public Page<TaskResponse> findAll(String email, Boolean done, String q, Pageable pageable) {
+        User user = getUserByEmail(email);
+        Long userId = user.getId();
+
         Page<Task> page;
 
         if (q != null && !q.isBlank()) {
@@ -35,16 +39,17 @@ public class TaskService {
         return page.map(TaskMapper::toResponse);
     }
 
-    public TaskResponse findById(Long userId, Long id) {
-        Task task = taskRepository.findByIdAndUserId(id, userId)
+    public TaskResponse findById(String email, Long id) {
+        User user = getUserByEmail(email);
+
+        Task task = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
         return TaskMapper.toResponse(task);
     }
 
-    public TaskResponse create(Long userId, TaskCreateRequest req) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public TaskResponse create(String email, TaskCreateRequest req) {
+        User user = getUserByEmail(email);
 
         Task task = new Task();
         task.setTitle(req.title());
@@ -55,8 +60,10 @@ public class TaskService {
         return TaskMapper.toResponse(taskRepository.save(task));
     }
 
-    public TaskResponse update(Long userId, Long id, TaskUpdateRequest req) {
-        Task existing = taskRepository.findByIdAndUserId(id, userId)
+    public TaskResponse update(String email, Long id, TaskUpdateRequest req) {
+        User user = getUserByEmail(email);
+
+        Task existing = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
         existing.setTitle(req.title());
@@ -66,10 +73,17 @@ public class TaskService {
         return TaskMapper.toResponse(taskRepository.save(existing));
     }
 
-    public void delete(Long userId, Long id) {
-        Task task = taskRepository.findByIdAndUserId(id, userId)
+    public void delete(String email, Long id) {
+        User user = getUserByEmail(email);
+
+        Task task = taskRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
         taskRepository.delete(task);
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

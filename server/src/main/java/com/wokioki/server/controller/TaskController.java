@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,36 +21,39 @@ public class TaskController {
 
     @GetMapping
     public Page<TaskResponse> getAll(
-            @RequestParam Long userId,
+            Authentication authentication,
             @RequestParam(required = false) Boolean done,
             @RequestParam(required = false) String q,
             Pageable pageable
     ) {
-        return taskService.findAll(userId, done, q, pageable);
+        return taskService.findAll(authentication.getName(), done, q, pageable);
     }
 
     @GetMapping("/{id}")
-    public TaskResponse getOne(@RequestParam Long userId, @PathVariable Long id) {
-        return taskService.findById(userId, id);
+    public TaskResponse getOne(Authentication authentication, @PathVariable Long id) {
+        return taskService.findById(authentication.getName(), id);
     }
 
     @PostMapping
-    public TaskResponse create(@RequestParam Long userId, @Valid @RequestBody TaskCreateRequest req) {
-        return taskService.create(userId, req);
+    public TaskResponse create(
+            Authentication authentication,
+            @Valid @RequestBody TaskCreateRequest req
+    ) {
+        return taskService.create(authentication.getName(), req);
     }
 
     @PutMapping("/{id}")
     public TaskResponse update(
-            @RequestParam Long userId,
+            Authentication authentication,
             @PathVariable Long id,
             @Valid @RequestBody TaskUpdateRequest req
     ) {
-        return taskService.update(userId, id, req);
+        return taskService.update(authentication.getName(), id, req);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@RequestParam Long userId, @PathVariable Long id) {
-        taskService.delete(userId, id);
+    public ResponseEntity<Void> delete(Authentication authentication, @PathVariable Long id) {
+        taskService.delete(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }
