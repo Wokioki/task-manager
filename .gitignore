@@ -2,16 +2,22 @@
 /server/target/
 *.log
 
-# === Frontend (React / Vite) ===
+# === Frontend (React) ===
 /client/node_modules/
 /client/dist/
+/client/build/
 
 # === IDE / OS ===
 **/.idea/
 **/*.iml
 .DS_Store
+Thumbs.db
 
-# env files
+# === Env / secrets ===
 .env
-server/.env
-client/.env.local
+*.env
+/server/.env
+/client/.env
+/client/.env.local
+/client/.env.development.local
+/client/.env.production.local
