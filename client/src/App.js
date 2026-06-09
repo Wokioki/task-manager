@@ -26,6 +26,9 @@ function App() {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
 
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
@@ -35,7 +38,7 @@ function App() {
 
     const isAuthenticated = Boolean(localStorage.getItem("token"));
 
-    async function load(q = search, done = statusFilter, showLoading = true) {
+    async function load(q = search, done = statusFilter, nextPage = page, showLoading = true) {
         if (showLoading) {
             setLoading(true);
         }
@@ -43,8 +46,16 @@ function App() {
         setError("");
 
         try {
-            const data = await getTasks({ page: 0, size: 100, q, done });
+            const data = await getTasks({
+                page: nextPage,
+                size: 5,
+                q,
+                done,
+            });
+
             setTasks(data.content || []);
+            setPage(data.number || 0);
+            setTotalPages(data.totalPages || 0);
         } catch (e) {
             setError(e.message || "Failed to load tasks");
 
@@ -109,7 +120,9 @@ function App() {
             setUsername("");
             setEmail("");
             setPassword("");
-            await load("");
+            setStatusFilter("all");
+            setSearch("");
+            await load("", "all", 0);
         } catch (e) {
             setError(e.message || "Authentication failed");
         } finally {
@@ -125,22 +138,41 @@ function App() {
         setTitle("");
         setDescription("");
         setSearch("");
+        setStatusFilter("all");
+        setPage(0);
+        setTotalPages(0);
+        setEditingTaskId(null);
         setError("");
     }
 
     async function onStatusFilterChange(nextFilter) {
         setStatusFilter(nextFilter);
-        await load(search, nextFilter, false);
+        setEditingTaskId(null);
+        await load(search, nextFilter, 0, false);
+    }
+
+    async function onPreviousPage() {
+        if (page === 0) return;
+        setEditingTaskId(null);
+        await load(search, statusFilter, page - 1, false);
+    }
+
+    async function onNextPage() {
+        if (page >= totalPages - 1) return;
+        setEditingTaskId(null);
+        await load(search, statusFilter, page + 1, false);
     }
 
     async function onSearchSubmit(e) {
         e.preventDefault();
-        await load(search, statusFilter, false);
+        setEditingTaskId(null);
+        await load(search, statusFilter, 0, false);
     }
 
     async function onClearSearch() {
         setSearch("");
-        await load("", statusFilter, false);
+        setEditingTaskId(null);
+        await load("", statusFilter, 0, false);
     }
 
     async function onCreate(e) {
@@ -160,7 +192,8 @@ function App() {
 
             setTitle("");
             setDescription("");
-            await load(search, statusFilter);
+            setEditingTaskId(null);
+            await load(search, statusFilter, 0);
         } catch (e) {
             setError(e.message || "Create failed");
         }
@@ -171,7 +204,8 @@ function App() {
 
         try {
             await deleteTask(id);
-            await load(search, statusFilter);
+            setEditingTaskId(null);
+            await load(search, statusFilter, page);
         } catch (e) {
             setError(e.message || "Delete failed");
         }
@@ -208,7 +242,7 @@ function App() {
             setEditTitle("");
             setEditDescription("");
 
-            await load(search, statusFilter);
+            await load(search, statusFilter, page);
         } catch (e) {
             setError(e.message || "Update failed");
         }
@@ -224,7 +258,8 @@ function App() {
                 done: !task.done,
             });
 
-            await load(search, statusFilter);
+            setEditingTaskId(null);
+            await load(search, statusFilter, page);
         } catch (e) {
             setError(e.message || "Update failed");
         }
@@ -360,7 +395,11 @@ function App() {
                 <div className="card">
                     <div className="section-title">
                         <h2>Tasks</h2>
-                        <button className="btn small" onClick={() => load(search)} disabled={loading}>
+                        <button
+                            className="btn small"
+                            onClick={() => load(search, statusFilter, page)}
+                            disabled={loading}
+                        >
                             Refresh
                         </button>
                     </div>
@@ -445,7 +484,7 @@ function App() {
                                             ) : (
                                                 <>
                                                     <div className="title">
-                                                        #{index + 1} {task.title}
+                                                        #{page * 5 + index + 1} {task.title}
                                                     </div>
 
                                                     {task.description && (
@@ -492,6 +531,32 @@ function App() {
                                     </li>
                                 ))}
                             </ul>
+                        </div>
+                    )}
+
+                    {totalPages > 1 && (
+                        <div className="pagination-row">
+                            <button
+                                className="btn small"
+                                type="button"
+                                onClick={onPreviousPage}
+                                disabled={page === 0 || loading}
+                            >
+                                Previous
+                            </button>
+
+                            <span className="page-info">
+                                Page {page + 1} of {totalPages}
+                            </span>
+
+                            <button
+                                className="btn small"
+                                type="button"
+                                onClick={onNextPage}
+                                disabled={page >= totalPages - 1 || loading}
+                            >
+                                Next
+                            </button>
                         </div>
                     )}
                 </div>
