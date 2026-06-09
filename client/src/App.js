@@ -24,6 +24,7 @@ function App() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
 
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editTitle, setEditTitle] = useState("");
@@ -34,12 +35,15 @@ function App() {
 
     const isAuthenticated = Boolean(localStorage.getItem("token"));
 
-    async function load(q = search) {
-        setLoading(true);
+    async function load(q = search, done = statusFilter, showLoading = true) {
+        if (showLoading) {
+            setLoading(true);
+        }
+
         setError("");
 
         try {
-            const data = await getTasks({ page: 0, size: 100, q });
+            const data = await getTasks({ page: 0, size: 100, q, done });
             setTasks(data.content || []);
         } catch (e) {
             setError(e.message || "Failed to load tasks");
@@ -48,7 +52,9 @@ function App() {
                 setUser(null);
             }
         } finally {
-            setLoading(false);
+            if (showLoading) {
+                setLoading(false);
+            }
         }
     }
 
@@ -122,14 +128,19 @@ function App() {
         setError("");
     }
 
+    async function onStatusFilterChange(nextFilter) {
+        setStatusFilter(nextFilter);
+        await load(search, nextFilter, false);
+    }
+
     async function onSearchSubmit(e) {
         e.preventDefault();
-        await load(search);
+        await load(search, statusFilter, false);
     }
 
     async function onClearSearch() {
         setSearch("");
-        await load("");
+        await load("", statusFilter, false);
     }
 
     async function onCreate(e) {
@@ -149,7 +160,7 @@ function App() {
 
             setTitle("");
             setDescription("");
-            await load(search);
+            await load(search, statusFilter);
         } catch (e) {
             setError(e.message || "Create failed");
         }
@@ -160,7 +171,7 @@ function App() {
 
         try {
             await deleteTask(id);
-            await load(search);
+            await load(search, statusFilter);
         } catch (e) {
             setError(e.message || "Delete failed");
         }
@@ -197,7 +208,7 @@ function App() {
             setEditTitle("");
             setEditDescription("");
 
-            await load(search);
+            await load(search, statusFilter);
         } catch (e) {
             setError(e.message || "Update failed");
         }
@@ -213,7 +224,7 @@ function App() {
                 done: !task.done,
             });
 
-            await load(search);
+            await load(search, statusFilter);
         } catch (e) {
             setError(e.message || "Update failed");
         }
@@ -344,7 +355,7 @@ function App() {
                 </form>
 
                 {error && <div className="error">{error}</div>}
-                {loading && <div className="muted">Loading…</div>}
+                {loading && tasks.length === 0 && <div className="muted">Loading…</div>}
 
                 <div className="card">
                     <div className="section-title">
@@ -372,6 +383,32 @@ function App() {
                             </button>
                         )}
                     </form>
+
+                    <div className="filter-row">
+                        <button
+                            className={statusFilter === "all" ? "filter-btn active" : "filter-btn"}
+                            type="button"
+                            onClick={() => onStatusFilterChange("all")}
+                        >
+                            All
+                        </button>
+
+                        <button
+                            className={statusFilter === "false" ? "filter-btn active" : "filter-btn"}
+                            type="button"
+                            onClick={() => onStatusFilterChange("false")}
+                        >
+                            Active
+                        </button>
+
+                        <button
+                            className={statusFilter === "true" ? "filter-btn active" : "filter-btn"}
+                            type="button"
+                            onClick={() => onStatusFilterChange("true")}
+                        >
+                            Done
+                        </button>
+                    </div>
 
                     {tasks.length === 0 && !loading ? (
                         <div className="empty">

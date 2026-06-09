@@ -31,7 +31,7 @@ async function handleResponse(res, fallbackMessage) {
     return res.json();
 }
 
-export async function getTasks({ page = 0, size = 100, q = "" } = {}) {
+export async function getTasks({ page = 0, size = 100, q = "", done = "all" } = {}) {
     const params = new URLSearchParams();
 
     params.set("page", page);
@@ -40,6 +40,10 @@ export async function getTasks({ page = 0, size = 100, q = "" } = {}) {
 
     if (q.trim()) {
         params.set("q", q.trim());
+    }
+
+    if (done !== "all") {
+        params.set("done", done);
     }
 
     const res = await fetch(`${BASE}/tasks?${params.toString()}`, {
