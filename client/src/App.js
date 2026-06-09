@@ -25,6 +25,10 @@ function App() {
     const [description, setDescription] = useState("");
     const [search, setSearch] = useState("");
 
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -159,6 +163,43 @@ function App() {
             await load(search);
         } catch (e) {
             setError(e.message || "Delete failed");
+        }
+    }
+
+    function onStartEdit(task) {
+        setEditingTaskId(task.id);
+        setEditTitle(task.title);
+        setEditDescription(task.description || "");
+    }
+
+    function onCancelEdit() {
+        setEditingTaskId(null);
+        setEditTitle("");
+        setEditDescription("");
+    }
+
+    async function onSaveEdit(task) {
+        setError("");
+
+        if (!editTitle.trim()) {
+            setError("Title is required");
+            return;
+        }
+
+        try {
+            await updateTask(task.id, {
+                title: editTitle.trim(),
+                description: editDescription.trim(),
+                done: task.done,
+            });
+
+            setEditingTaskId(null);
+            setEditTitle("");
+            setEditDescription("");
+
+            await load(search);
+        } catch (e) {
+            setError(e.message || "Update failed");
         }
     }
 
@@ -348,30 +389,68 @@ function App() {
                                 {tasks.map((task, index) => (
                                     <li key={task.id} className={task.done ? "item done" : "item"}>
                                         <div className="info">
-                                            <div className="title">
-                                                #{index + 1} {task.title}
-                                            </div>
+                                            {editingTaskId === task.id ? (
+                                                <div className="edit-box">
+                                                    <input
+                                                        className="input"
+                                                        value={editTitle}
+                                                        onChange={(e) => setEditTitle(e.target.value)}
+                                                        placeholder="Task title"
+                                                    />
 
-                                            {task.description && (
-                                                <div className="desc">{task.description}</div>
+                                                    <textarea
+                                                        className="input"
+                                                        value={editDescription}
+                                                        onChange={(e) => setEditDescription(e.target.value)}
+                                                        placeholder="Task description"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="title">
+                                                        #{index + 1} {task.title}
+                                                    </div>
+
+                                                    {task.description && (
+                                                        <div className="desc">{task.description}</div>
+                                                    )}
+
+                                                    <div className="meta">
+                                                        Status: {task.done ? "Done" : "Active"}
+                                                    </div>
+                                                </>
                                             )}
-
-                                            <div className="meta">
-                                                Status: {task.done ? "Done" : "Active"}
-                                            </div>
                                         </div>
 
                                         <div className="actions">
-                                            <button className="btn" onClick={() => onToggleDone(task)}>
-                                                {task.done ? "Undone" : "Done"}
-                                            </button>
+                                            {editingTaskId === task.id ? (
+                                                <>
+                                                    <button className="btn primary" onClick={() => onSaveEdit(task)}>
+                                                        Save
+                                                    </button>
 
-                                            <button
-                                                className="btn danger"
-                                                onClick={() => onDelete(task.id)}
-                                            >
-                                                Delete
-                                            </button>
+                                                    <button className="btn" onClick={onCancelEdit}>
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="btn" onClick={() => onToggleDone(task)}>
+                                                        {task.done ? "Undone" : "Done"}
+                                                    </button>
+
+                                                    <button className="btn" onClick={() => onStartEdit(task)}>
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className="btn danger"
+                                                        onClick={() => onDelete(task.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </li>
                                 ))}

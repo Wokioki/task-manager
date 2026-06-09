@@ -338,3 +338,11 @@ textarea.input {
     flex-direction: column;
   }
 }
+
+.edit-box {
+  width: 100%;
+}
+
+.edit-box .input {
+  margin-bottom: 8px;
+}
